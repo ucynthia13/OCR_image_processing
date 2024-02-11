@@ -1,35 +1,35 @@
 import cv2
 import pytesseract
 
-# Set the path to the Tesseract OCR executable (change this according to your installation)
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+# Specify the Tesseract path
+tesseract_path = r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"  # Adjust path if needed
+pytesseract.pytesseract.tesseract_cmd = tesseract_path
 
-def extract_text_from_roi(image_path, roi_coordinates):
-    # Read the image
-    image = cv2.imread(image_path)
+# Load the image
+img = cv2.imread("./image.png")
 
-    # Extract the region of interest (ROI)
-    x, y, w, h = roi_coordinates
-    roi = image[y:y + h, x:x + w]
+# Preprocess the image for better OCR results
+gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
-    # Convert the ROI to grayscale
-    gray_roi = cv2.cvtColor(roi, cv2.COLOR_BGR2GRAY)
+# Find the single largest contour (assuming a single ROI)
+cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+cnts = cnts[0] if len(cnts) == 2 else cnts[1]
+largest_cnt = max(cnts, key=cv2.contourArea)
 
-    # Apply any additional preprocessing if needed (e.g., thresholding, filtering)
+# Extract the ROI based on the largest contour
+x, y, w, h = cv2.boundingRect(largest_cnt)
+roi = img[y:y+h, x:x+w]
 
-    # Use Tesseract OCR to extract text
-    text = pytesseract.image_to_string(gray_roi)
+# Perform OCR on the ROI
+text = pytesseract.image_to_string(roi, config='--psm 10')
 
-    return text
+# Display the extracted text
+print(text)
 
-if __name__ == "__main__":
-    # Specify the image path and ROI coordinates (x, y, width, height)
-    image_path = "./image.png"
-    roi_coordinates = (100, 50, 300, 200)  # Adjust these coordinates based on your image
-
-    # Extract text from the specified ROI
-    extracted_text = extract_text_from_roi(image_path, roi_coordinates)
-
-    # Print the extracted text
-    print("Extracted Text:")
-    print(extracted_text)
+# Optionally display the image with the ROI highlighted (for verification)
+if cv2.waitKey(0) == ord("q"):  # Quit on 'q' key press
+    cv2.rectangle(img, (x, y), (x+w, y+h), (0, 255, 0), 2)  # Draw a green rectangle around the ROI
+    cv2.imshow("Image with ROI", img)
+    cv2.waitKey(0)
+    cv2.destroyAllWindows()
