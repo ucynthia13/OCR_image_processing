@@ -1,28 +1,27 @@
 import cv2
 import pytesseract
 
-# Tesseract path
-tesseract_path = r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe" 
-pytesseract.pytesseract.tesseract_cmd = tesseract_path
+# Configure Tesseract path (update if needed)
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"
 
-img = cv2.imread("./image.png")
+# Load the image
+image = cv2.imread("./surf.jpg")
 
-gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-thresh = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
+# Preprocess the image
+grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+thresholded_image = cv2.threshold(grayscale_image, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)[1]
 
-# Find the single largest contour = a single ROI
-cnts = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-cnts = cnts[0] if len(cnts) == 2 else cnts[1]
-largest_cnt = max(cnts, key=cv2.contourArea)
+# Find contours (adjust for potential multiple digits)
+contours = cv2.findContours(thresholded_image, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+contours = contours[0] if len(contours) == 2 else contours[1]
 
-# Extract the ROI based on the largest contour
-x, y, w, h = cv2.boundingRect(largest_cnt)
-roi = img[y:y+h, x:x+w]
+# Extract the largest region of interest (ROI)
+largest_contour = max(contours, key=cv2.contourArea)
+x, y, w, h = cv2.boundingRect(largest_contour)
+roi = image[y:y+h, x:x+w]
 
 # Perform OCR on the ROI
-text = pytesseract.image_to_string(roi, config='--psm 10')
+extracted_text = pytesseract.image_to_string(roi, config='--psm 10')
 
-# Display text
-print(text)
-
-
+# Display the extracted text
+print(extracted_text)
