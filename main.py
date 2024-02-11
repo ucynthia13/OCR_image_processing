@@ -5,7 +5,7 @@ import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files (x86)\Tesseract-OCR\tesseract.exe"
 
 # Load the image
-image = cv2.imread("./surf.jpg")
+image = cv2.imread("./image.png")
 
 # Preprocess the image
 grayscale_image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
