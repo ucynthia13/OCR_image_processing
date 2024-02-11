@@ -21,7 +21,7 @@ x, y, w, h = cv2.boundingRect(largest_contour)
 roi = image[y:y+h, x:x+w]
 
 # Perform OCR on the ROI
-extracted_text = pytesseract.image_to_string(roi, config='--psm 10')
+extracted_text = pytesseract.image_to_string(roi, config='--psm 10 --oem 3 -c tessedit_char_whitelist=0123456789')
 
 # Display the extracted text
 print(extracted_text)
