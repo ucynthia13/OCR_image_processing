@@ -28,5 +28,9 @@ def getImagesAndLabels(path):
     return faceSamples, Ids
 
 faces, Ids = getImagesAndLabels('./model/dataset')
-recognizer.train(faces, np.array(Ids))
+
+print("Number of faces:", len(faces))
+print("Number of Ids:", len(Ids))
+
+recognizer.train(faces, np.array(Ids))      
 recognizer.save("./model/trained_lbph_face_recognizer_model.yml")
